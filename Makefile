@@ -1,5 +1,5 @@
 CC = i686-elf-gcc
-AS = nasm
+AS = i686-elf-as
 CFLAGS = -std=gnu99 -ffreestanding -O2 -Wall -Wextra
 
 SRCS = src/kernel.c
@@ -7,8 +7,8 @@ OBJS = src/boot.o src/kernel.o
 
 all: FrenchToastOS.iso
 
-src/boot.o: src/boot.asm
-	$(AS) -f elf32 src/boot.asm -o src/boot.o
+src/boot.o: src/boot.s
+	$(AS) src/boot.s -o src/boot.o
 
 src/kernel.o: src/kernel.c
 	$(CC) $(CFLAGS) -c src/kernel.c -o src/kernel.o
