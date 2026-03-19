@@ -1,3 +1,6 @@
+/* Copyright (c) 2026 Arslaan Pathan
+This software is licensed under the ARPL. See LICENSE for details. */
+
 /* Multiboot header dark magic, do not touch */
 .set ALIGN, 1<<0
 .set MEMINFO, 1<<1
@@ -34,7 +37,7 @@ _start:
 
 	/* here we need to init crucial processor state.
 	load the gdt, enable pages, init isa extensions/floating point instructions and stuff
-	for now just dont do anything we'll add that later */
+	for now just dont do anything we'll add that later(TM) */
 
 	/* enter the high level kernel
 	ABI says we need 16-byte alignment here, we aligned that before and pushed a multiple of 16 bits (zero) so we fine

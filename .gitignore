@@ -1,0 +1,5 @@
+src/boot.o
+src/kernel.o
+*.iso
+FrenchToastOS.bin
+isodir

@@ -1,3 +1,6 @@
+/* Copyright (c) 2026 Arslaan Pathan
+This software is licensed under the ARPL. See LICENSE for details. */
+
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -9,7 +12,7 @@
 
 /* This operating system will only work for the 32-bit ix86 targets. */
 #if !defined(__i386__)
-#error "This tutorial needs to be compiled with a ix86-elf compiler"
+#error "this operating system needs to be compiled with a ix86-elf compiler"
 #endif
 
 /* Hardware text mode color constants. */
@@ -86,7 +89,14 @@ void terminal_putentryat(char c, uint8_t color, size_t x, size_t y)
 
 void terminal_putchar(char c) 
 {
+	if (c == '\n') {
+	 	terminal_column = 0;
+		++terminal_row;
+		return;
+	}
+
 	terminal_putentryat(c, terminal_color, terminal_column, terminal_row);
+
 	if (++terminal_column == VGA_WIDTH) {
 		terminal_column = 0;
 		if (++terminal_row == VGA_HEIGHT)
@@ -110,7 +120,8 @@ void kernel_main(void)
 	/* Initialize terminal interface */
 	terminal_initialize();
 
-	terminal_writestring("Hello, kernel World!\n");
+	terminal_writestring("loading FrenchToastOS...\n");
+	terminal_writestring("developed by Arslaan Pathan");
 
 	while (1) {
 		__asm__ __volatile__ ("hlt");
