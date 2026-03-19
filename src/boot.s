@@ -21,7 +21,7 @@ stack_bottom:
 stack_top:
 
 /* _start is the entrypoint */
-.section text
+.section .text
 .global _start
 .type _start, @function
 _start:
