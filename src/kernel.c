@@ -5,14 +5,14 @@ This software is licensed under the ARPL. See LICENSE for details. */
 #include <stddef.h>
 #include <stdint.h>
 
-/* Check if the compiler thinks you are targeting the wrong operating system. */
+/* check if compiler thinks we are targeting incorrect OS. */
 #if defined(__linux__)
-#error "you are not using a cross-compiler, this is bad. use an elf cross-compiler for ix86 targets, for example, i686-elf-gcc"
+#error "you are not using a cross-compiler, this is bad. use an elf cross-compiler for ix86 targets, for example, i386-elf-gcc"
 #endif
 
-/* This operating system will only work for the 32-bit ix86 targets. */
+/* OS only works on 32bit ix86 */
 #if !defined(__i386__)
-#error "this operating system needs to be compiled with a ix86-elf compiler"
+#error "this operating system is only supported on ix86 targets. use an elf cross-compiler for ix86 targets, for example, i386-elf-gcc"
 #endif
 
 /* Hardware text mode color constants. */
@@ -123,6 +123,8 @@ void kernel_main(void)
 	terminal_writestring("loading FrenchToastOS...\n");
 	terminal_writestring("developed by Arslaan Pathan");
 
+	/* if there is nothing else to do, halt, or the computer commit die */
+	/* our boot.s code does this already, but better to be safe than f**ked */
 	while (1) {
 		__asm__ __volatile__ ("hlt");
 	}

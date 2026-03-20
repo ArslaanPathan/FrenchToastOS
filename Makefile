@@ -2,8 +2,9 @@ CC = i386-elf-gcc
 AS = i386-elf-as
 CFLAGS = -std=gnu99 -ffreestanding -O2 -Wall -Wextra
 
-SRCS = src/kernel.c
 OBJS = src/boot.o src/kernel.o
+
+.PHONY: all clean iso-files
 
 all: FrenchToastOS-bios.iso FrenchToastOS-efi.iso
 
@@ -20,7 +21,6 @@ iso-files: FrenchToastOS.bin
 	mkdir -p isodir/boot/grub
 	cp FrenchToastOS.bin isodir/boot/
 	cp boot/grub.cfg isodir/boot/grub/
-
 
 FrenchToastOS-bios.iso: iso-files
 	grub-mkrescue /usr/lib/grub/i386-pc -o FrenchToastOS-bios.iso isodir

@@ -2,17 +2,33 @@
 This software is licensed under the ARPL. See LICENSE for details. */
 
 /* Multiboot header dark magic, do not touch */
-.set ALIGN, 1<<0
-.set MEMINFO, 1<<1
-.set FLAGS, ALIGN | MEMINFO
-.set MAGIC, 0x1BADB002
+.set ALIGN,    1<<0
+.set MEMINFO,  1<<1
+.set VIDMODE,  1<<2
+.set FLAGS,    ALIGN | MEMINFO | VIDMODE
+.set MAGIC,    0x1BADB002
 .set CHECKSUM, -(MAGIC + FLAGS)
+
+/* ask grub for framebuffer
+   if this breaks the OS i might crash out */
+.set WIDTH,    1024
+.set HEIGHT,   768
+.set DEPTH,    32
 
 .section .multiboot 
 .align 4
 .long MAGIC
 .long FLAGS
 .long CHECKSUM
+.long 0                         /* header_addr (unused) */
+.long 0                         /* load_addr (unused) */
+.long 0                         /* load_end_addr (unused) */
+.long 0                         /* bss_end_addr (unused) */
+.long 0                         /* entry_addr (unused) */
+.long 0                         /* mode_type: 0 = linear framebuffer */
+.long WIDTH                     /* width */
+.long HEIGHT                    /* height */
+.long DEPTH                     /* depth */
 
 /* Multiboot does not define the esp/stack, create the stack ourselves */
 .section bss
@@ -43,6 +59,7 @@ _start:
 	ABI says we need 16-byte alignment here, we aligned that before and pushed a multiple of 16 bits (zero) so we fine
 	but i will realign for good measure anyway */
 	.align 16 
+	push %ebx
 	call kernel_main
 
 	/* if nothing left then just infinite loop */
