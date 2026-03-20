@@ -1,1 +1,5 @@
 # FrenchToastOS
+
+## Credits
+
+- Terminal font: https://github.com/dhepper/font8x8
