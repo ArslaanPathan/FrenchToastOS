@@ -15,116 +15,56 @@ This software is licensed under the ARPL. See LICENSE for details. */
 #error "this operating system is only supported on ix86 targets. use an elf cross-compiler for ix86 targets, for example, i386-elf-gcc"
 #endif
 
-/* Hardware text mode color constants. */
-enum vga_color {
-	VGA_COLOR_BLACK = 0,
-	VGA_COLOR_BLUE = 1,
-	VGA_COLOR_GREEN = 2,
-	VGA_COLOR_CYAN = 3,
-	VGA_COLOR_RED = 4,
-	VGA_COLOR_MAGENTA = 5,
-	VGA_COLOR_BROWN = 6,
-	VGA_COLOR_LIGHT_GREY = 7,
-	VGA_COLOR_DARK_GREY = 8,
-	VGA_COLOR_LIGHT_BLUE = 9,
-	VGA_COLOR_LIGHT_GREEN = 10,
-	VGA_COLOR_LIGHT_CYAN = 11,
-	VGA_COLOR_LIGHT_RED = 12,
-	VGA_COLOR_LIGHT_MAGENTA = 13,
-	VGA_COLOR_LIGHT_BROWN = 14,
-	VGA_COLOR_WHITE = 15,
-};
+/* what in the dark magic? ok just dont touch one can hope */
+struct multiboot_info {
+	uint32_t flags;
+	uint32_t mem_lower;
+	uint32_t mem_upper;
+	uint32_t boot_device;
+	uint32_t cmdline;
+	uint32_t mods_count;
+	uint32_t mods_addr;
+	uint32_t syms[4];
+	uint32_t mmap_length;
+	uint32_t mmap_addr;
+	uint32_t drives_length;
+	uint32_t drives_addr;
+	uint32_t config_table;
+	uint32_t boot_loader_name;
+	uint32_t apm_table;
+	uint32_t vbe_control_info;
+	uint32_t vbe_mode_info;
+	uint16_t vbe_mode;
+	uint16_t vbe_interface_seg;
+	uint16_t vbe_interface_off;
+	uint16_t vbe_interface_len;
+	uint64_t framebuffer_addr;
+	uint32_t framebuffer_pitch;
+	uint32_t framebuffer_width;
+	uint32_t framebuffer_height;
+	uint8_t  framebuffer_bpp;
+	uint8_t  framebuffer_type;
+	uint8_t  color_info[6];
+} __attribute__((packed));
 
-static inline uint8_t vga_entry_color(enum vga_color fg, enum vga_color bg) 
+void kernel_main(struct multiboot_info *mbi) 
 {
-	return fg | bg << 4;
-}
+	// check if framebuffer info is available (bit 12)
+	if (!(mbi->flags & (1 << 12))) {
+		while(1) __asm__("hlt");
+	}
 
-static inline uint16_t vga_entry(unsigned char uc, uint8_t color) 
-{
-	return (uint16_t) uc | (uint16_t) color << 8;
-}
+	uint32_t *framebuffer = (uint32_t*)(uintptr_t)mbi->framebuffer_addr;
+	uint32_t width = mbi->framebuffer_width;
+	uint32_t height = mbi->framebuffer_height;
+	uint32_t pitch = mbi->framebuffer_pitch;
 
-size_t strlen(const char* str) 
-{
-	size_t len = 0;
-	while (str[len])
-		len++;
-	return len;
-}
-
-#define VGA_WIDTH   80
-#define VGA_HEIGHT  25
-#define VGA_MEMORY  0xB8000 
-
-size_t terminal_row;
-size_t terminal_column;
-uint8_t terminal_color;
-uint16_t* terminal_buffer = (uint16_t*)VGA_MEMORY;
-
-void terminal_initialize(void) 
-{
-	terminal_row = 0;
-	terminal_column = 0;
-	terminal_color = vga_entry_color(VGA_COLOR_LIGHT_GREY, VGA_COLOR_BLACK);
-	
-	for (size_t y = 0; y < VGA_HEIGHT; y++) {
-		for (size_t x = 0; x < VGA_WIDTH; x++) {
-			const size_t index = y * VGA_WIDTH + x;
-			terminal_buffer[index] = vga_entry(' ', terminal_color);
+	for (uint32_t y = 0; y < height; y++) {
+		for (uint32_t x = 0; x < width; x++) {
+		    framebuffer[y * (pitch / 4) + x] = 0x00FFFF00;
 		}
 	}
-}
 
-void terminal_setcolor(uint8_t color) 
-{
-	terminal_color = color;
-}
-
-void terminal_putentryat(char c, uint8_t color, size_t x, size_t y) 
-{
-	const size_t index = y * VGA_WIDTH + x;
-	terminal_buffer[index] = vga_entry(c, color);
-}
-
-void terminal_putchar(char c) 
-{
-	if (c == '\n') {
-	 	terminal_column = 0;
-		++terminal_row;
-		return;
-	}
-
-	terminal_putentryat(c, terminal_color, terminal_column, terminal_row);
-
-	if (++terminal_column == VGA_WIDTH) {
-		terminal_column = 0;
-		if (++terminal_row == VGA_HEIGHT)
-			terminal_row = 0;
-	}
-}
-
-void terminal_write(const char* data, size_t size) 
-{
-	for (size_t i = 0; i < size; i++)
-		terminal_putchar(data[i]);
-}
-
-void terminal_writestring(const char* data) 
-{
-	terminal_write(data, strlen(data));
-}
-
-void kernel_main(void) 
-{
-	/* Initialize terminal interface */
-	terminal_initialize();
-
-	terminal_writestring("loading FrenchToastOS...\n");
-	terminal_writestring("developed by Arslaan Pathan");
-
-	/* if there is nothing else to do, halt, or the computer commit die */
-	/* our boot.s code does this already, but better to be safe than f**ked */
 	while (1) {
 		__asm__ __volatile__ ("hlt");
 	}
