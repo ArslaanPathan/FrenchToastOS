@@ -11,6 +11,8 @@ This software is licensed under the ARPL. See LICENSE for details. */
 
 /* ask grub for framebuffer
    if this breaks the OS i might crash out */
+/* THIS IS NOT GUARANTEED 1024x768x32!!!!!
+   VIDEO MODE **CAN** AND MOST LIKELY WILL CHANGE ON OTHER SYSTEMS!! */
 .set WIDTH,    1024
 .set HEIGHT,   768
 .set DEPTH,    32
